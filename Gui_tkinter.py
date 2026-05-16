@@ -253,7 +253,7 @@ class GuiTkinter:
         else:
             self.notify(f"Fin de partie: joueur {winner} gagne ({score0} - {score1}).")
         
-        self.gui._show_game_over()
+        self._show_game_over()
 
         self.canvas.unbind("<Button-1>")
         self.canvas.create_rectangle(
