@@ -52,12 +52,12 @@ class GuiTkinter:
         p0_frame = tk.Frame(self.menu_frame)
         p0_frame.pack(fill="x", pady=8)
         tk.Label(p0_frame, text="Joueur 0", font=("Arial", 12, "bold")).pack(side="left")
-        tk.OptionMenu(p0_frame, self.player0_type_var, "Humain").pack(side="right")
+        tk.OptionMenu(p0_frame, self.player0_type_var, "Humain", "IA (Stupide)").pack(side="right")
 
         p1_frame = tk.Frame(self.menu_frame)
         p1_frame.pack(fill="x", pady=8)
         tk.Label(p1_frame, text="Joueur 1", font=("Arial", 12, "bold")).pack(side="left")
-        tk.OptionMenu(p1_frame, self.player1_type_var, "Humain").pack(side="right")
+        tk.OptionMenu(p1_frame, self.player1_type_var, "Humain", "IA (Stupide)").pack(side="right")
 
         start_button = tk.Button(
             self.menu_frame,
