@@ -1,6 +1,5 @@
 import tkinter as tk
-from typing import Optional
-
+from typing import Optional, Callable
 from Awale import Awale
 
 
@@ -21,8 +20,69 @@ class GuiTkinter:
         self.canvas_width = self.margin_x * 2 + self.cell_width * 6
         self.canvas_height = 470
 
+        self._pit_bounds = {}
+        self._game_over = False
+
+        self.on_pit_click_callback: Optional[Callable[[int], None]] = None
+        self.on_start_game_callback: Optional[Callable[[dict], None]] = None
+        self.on_replay_callback: Optional[Callable[[], None]] = None
+        self.on_back_to_menu_callback: Optional[Callable[[], None]] = None
+
+        self._build_menu_ui()
+        self._build_game_ui()
+
+        self.show_menu()
+
+    def _build_menu_ui(self) -> None:
+        self.menu_frame = tk.Frame(self.root, padx=20, pady=20)
+
+        title = tk.Label(self.menu_frame, text="Awale", font=("Arial", 24, "bold"))
+        title.pack(pady=(0, 20))
+
+        subtitle = tk.Label(
+            self.menu_frame,
+            text="Configuration de la partie",
+            font=("Arial", 13),
+        )
+        subtitle.pack(pady=(0, 20))
+
+        self.player0_type_var = tk.StringVar(value="Humain")
+        self.player1_type_var = tk.StringVar(value="Humain")
+
+        p0_frame = tk.Frame(self.menu_frame)
+        p0_frame.pack(fill="x", pady=8)
+        tk.Label(p0_frame, text="Joueur 0", font=("Arial", 12, "bold")).pack(side="left")
+        tk.OptionMenu(p0_frame, self.player0_type_var, "Humain").pack(side="right")
+
+        p1_frame = tk.Frame(self.menu_frame)
+        p1_frame.pack(fill="x", pady=8)
+        tk.Label(p1_frame, text="Joueur 1", font=("Arial", 12, "bold")).pack(side="left")
+        tk.OptionMenu(p1_frame, self.player1_type_var, "Humain").pack(side="right")
+
+        start_button = tk.Button(
+            self.menu_frame,
+            text="Demarrer la partie",
+            font=("Arial", 12, "bold"),
+            command=self._handle_start_from_menu,
+            padx=12,
+            pady=8,
+        )
+        start_button.pack(pady=(20, 8))
+
+        quit_button = tk.Button(
+            self.menu_frame,
+            text="Quitter",
+            command=self.root.destroy,
+            padx=12,
+            pady=6,
+        )
+        quit_button.pack()
+
+    def _build_game_ui(self) -> None:
+        self.game_frame = tk.Frame(self.root)
+
         self.canvas = tk.Canvas(
-            self.root,
+            self.game_frame,
             width=self.canvas_width,
             height=self.canvas_height,
             bg="#1f6f4a",
@@ -30,7 +90,7 @@ class GuiTkinter:
         )
         self.canvas.pack(padx=10, pady=10)
 
-        self.info_frame = tk.Frame(self.root)
+        self.info_frame = tk.Frame(self.game_frame)
         self.info_frame.pack(fill="x", padx=10, pady=(0, 10))
 
         self.score_var = tk.StringVar()
@@ -59,15 +119,22 @@ class GuiTkinter:
         )
         self.message_label.pack(anchor="w")
 
-        self.button_frame = tk.Frame(self.root)
+        self.button_frame = tk.Frame(self.game_frame)
         self.button_frame.pack(fill="x", padx=10, pady=(0, 10))
 
-        self.reset_button = tk.Button(
+        self.new_round_button = tk.Button(
             self.button_frame,
-            text="Recommencer",
-            command=self.reset_game,
+            text="Nouvelle manche",
+            command=self._handle_replay,
         )
-        self.reset_button.pack(side="left")
+        self.new_round_button.pack(side="left")
+
+        self.menu_button = tk.Button(
+            self.button_frame,
+            text="Menu",
+            command=self._handle_back_to_menu,
+        )
+        self.menu_button.pack(side="left", padx=(8, 0))
 
         self.quit_button = tk.Button(
             self.button_frame,
@@ -76,13 +143,7 @@ class GuiTkinter:
         )
         self.quit_button.pack(side="right")
 
-        self._pit_bounds = {}
-        self._game_over = False
-
-        self.on_pit_click_callback = None
         self.canvas.bind("<Button-1>", self._on_canvas_click)
-
-        self.refresh()
 
     def run(self) -> None:
         self.root.mainloop()
@@ -90,15 +151,41 @@ class GuiTkinter:
     def start(self) -> None:
         self.run()
 
+    def show_menu(self) -> None:
+        self.game_frame.pack_forget()
+        self.menu_frame.pack(fill="both", expand=True)
+        self.message_var.set("")
+        self._game_over = False
+
+    def show_game(self) -> None:
+        self.menu_frame.pack_forget()
+        self.game_frame.pack(fill="both", expand=True)
+        self.refresh()
+
+    def _handle_start_from_menu(self) -> None:
+        config = {
+            "player0_type": self.player0_type_var.get(),
+            "player1_type": self.player1_type_var.get(),
+        }
+        if self.on_start_game_callback:
+            self.on_start_game_callback(config)
+        else:
+            self.show_game()
+
+    def _handle_replay(self) -> None:
+        if self.on_replay_callback:
+            self.on_replay_callback()
+
+    def _handle_back_to_menu(self) -> None:
+        if self.on_back_to_menu_callback:
+            self.on_back_to_menu_callback()
+        else:
+            self.show_menu()
+
     def set_game(self, game: Awale) -> None:
         self.game = game
         self._game_over = False
-        self.refresh()
-
-    def reset_game(self) -> None:
-        self.game = Awale()
-        self._game_over = False
-        self.notify("Nouvelle partie.")
+        self.canvas.bind("<Button-1>", self._on_canvas_click)
         self.refresh()
 
     def notify(self, message: str) -> None:
@@ -148,7 +235,7 @@ class GuiTkinter:
         self.canvas.create_text(
             self.canvas_width / 2,
             35,
-            text="Awalé",
+            text="Awale",
             fill="white",
             font=("Arial", 22, "bold"),
         )
@@ -244,28 +331,25 @@ class GuiTkinter:
         self.score_var.set(f"Scores - Joueur 0: {score0} | Joueur 1: {score1}")
         self.turn_var.set(f"Tour du joueur {current_player}")
 
-    def _show_game_over(self) -> None:
+    def show_game_over(self) -> None:
+        self._game_over = True
+        self.canvas.unbind("<Button-1>")
+
         winner = self.game.get_winner()
         score0, score1 = self.game.get_score()
 
         if winner is None:
-            self.notify(f"Fin de partie: égalité ({score0} - {score1}).")
+            self.notify(f"Fin de manche: egalite ({score0} - {score1}).")
+            text = "Match nul"
         else:
-            self.notify(f"Fin de partie: joueur {winner} gagne ({score0} - {score1}).")
-        
-        self._show_game_over()
+            self.notify(f"Fin de manche: joueur {winner} gagne ({score0} - {score1}).")
+            text = f"Joueur {winner} gagne"
 
-        self.canvas.unbind("<Button-1>")
         self.canvas.create_rectangle(
             90, 180, self.canvas_width - 90, 260,
             fill="#ffffff",
             outline="#ffffff",
         )
-        if winner is None:
-            text = "Match nul"
-        else:
-            text = f"Joueur {winner} gagne"
-
         self.canvas.create_text(
             self.canvas_width / 2,
             220,
