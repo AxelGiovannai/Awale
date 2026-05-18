@@ -49,15 +49,47 @@ class GuiTkinter:
         self.player0_type_var = tk.StringVar(value="Humain")
         self.player1_type_var = tk.StringVar(value="Humain")
 
-        p0_frame = tk.Frame(self.menu_frame)
-        p0_frame.pack(fill="x", pady=8)
-        tk.Label(p0_frame, text="Joueur 0", font=("Arial", 12, "bold")).pack(side="left")
-        tk.OptionMenu(p0_frame, self.player0_type_var, "Humain", "IA (Stupide)").pack(side="right")
+        self.player0_depth_var = tk.IntVar(value=4)
+        self.player1_depth_var = tk.IntVar(value=4)
 
-        p1_frame = tk.Frame(self.menu_frame)
+        self.player0_heuristic_var = tk.StringVar(value="score")
+        self.player1_heuristic_var = tk.StringVar(value="score")
+
+        p0_frame = tk.LabelFrame(self.menu_frame, text="Joueur 0", padx=10, pady=10)
+        p0_frame.pack(fill="x", pady=8)
+
+        tk.Label(p0_frame, text="Type").grid(row=0, column=0, sticky="w")
+        tk.OptionMenu(
+            p0_frame, self.player0_type_var, "Humain", "IA (Stupide)", "IA (MinMax)"
+        ).grid(row=0, column=1, sticky="ew")
+
+        tk.Label(p0_frame, text="Profondeur").grid(row=1, column=0, sticky="w")
+        tk.Spinbox(
+            p0_frame, from_=1, to=8, textvariable=self.player0_depth_var, width=5
+        ).grid(row=1, column=1, sticky="w")
+
+        tk.Label(p0_frame, text="Heuristique").grid(row=2, column=0, sticky="w")
+        tk.OptionMenu(
+            p0_frame, self.player0_heuristic_var, "score", "mobility"
+        ).grid(row=2, column=1, sticky="ew")
+
+        p1_frame = tk.LabelFrame(self.menu_frame, text="Joueur 1", padx=10, pady=10)
         p1_frame.pack(fill="x", pady=8)
-        tk.Label(p1_frame, text="Joueur 1", font=("Arial", 12, "bold")).pack(side="left")
-        tk.OptionMenu(p1_frame, self.player1_type_var, "Humain", "IA (Stupide)").pack(side="right")
+
+        tk.Label(p1_frame, text="Type").grid(row=0, column=0, sticky="w")
+        tk.OptionMenu(
+            p1_frame, self.player1_type_var, "Humain", "IA (Stupide)", "IA (MinMax)"
+        ).grid(row=0, column=1, sticky="ew")
+
+        tk.Label(p1_frame, text="Profondeur").grid(row=1, column=0, sticky="w")
+        tk.Spinbox(
+            p1_frame, from_=1, to=8, textvariable=self.player1_depth_var, width=5
+        ).grid(row=1, column=1, sticky="w")
+
+        tk.Label(p1_frame, text="Heuristique").grid(row=2, column=0, sticky="w")
+        tk.OptionMenu(
+            p1_frame, self.player1_heuristic_var, "score", "mobility"
+        ).grid(row=2, column=1, sticky="ew")
 
         start_button = tk.Button(
             self.menu_frame,
@@ -164,8 +196,16 @@ class GuiTkinter:
 
     def _handle_start_from_menu(self) -> None:
         config = {
-            "player0_type": self.player0_type_var.get(),
-            "player1_type": self.player1_type_var.get(),
+            "player0": {
+                "type": self.player0_type_var.get(),
+                "depth": self.player0_depth_var.get(),
+                "heuristic": self.player0_heuristic_var.get(),
+            },
+            "player1": {
+                "type": self.player1_type_var.get(),
+                "depth": self.player1_depth_var.get(),
+                "heuristic": self.player1_heuristic_var.get(),
+            },
         }
         if self.on_start_game_callback:
             self.on_start_game_callback(config)

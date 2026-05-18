@@ -1,6 +1,8 @@
 from Awale import Awale
 from Gui_tkinter import GuiTkinter
 from Human import Human
+from MinMax import MinMaxBot
+from StupidBot import StupidBot
 from typing import Optional, Callable, Any
 
 
@@ -27,20 +29,8 @@ class GameController:
 
     def _on_start_game(self, config: dict) -> None:
         self.current_config = config
-        
-        # Crée les joueurs selon la config
-        if config["player0_type"] == "Humain":
-            self.player0 = Human("Joueur 0", 0, self.game, self.gui)
-        else:
-            from StupidBot import StupidBot
-            self.player0 = StupidBot("Joueur 0", 0, self.game, self.gui)
-        
-        if config["player1_type"] == "Humain":
-            self.player1 = Human("Joueur 1", 1, self.game, self.gui)
-        else:
-            from StupidBot import StupidBot
-            self.player1 = StupidBot("Joueur 1", 1, self.game, self.gui)
-        
+        self.player0 = self._create_player("Joueur 0", 0, config["player0"])
+        self.player1 = self._create_player("Joueur 1", 1, config["player1"])
         self._new_round()
         self.gui.show_game()
         self.gui.notify("Partie lancee. Joueur 0 commence.")
@@ -135,3 +125,24 @@ class GameController:
 
         except ValueError as e:
             self.gui.notify(f"Erreur: {e}")
+
+    def _create_player(self, name: str, player_id: int, config: dict):
+        player_type = config["type"]
+
+        if player_type == "Humain":
+            return Human(name, player_id, self.game, self.gui)
+
+        if player_type == "IA (Stupide)":
+            return StupidBot(name, player_id, self.game, self.gui)
+
+        if player_type == "IA (MinMax)":
+            return MinMaxBot(
+                name,
+                player_id,
+                self.game,
+                self.gui,
+                max_depth=config.get("depth", 4),
+                heuristic=config.get("heuristic", "score"),
+            )
+
+        raise ValueError(f"Type de joueur inconnu: {player_type}")
