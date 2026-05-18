@@ -5,14 +5,8 @@ Jeu d’Awalé en Python avec interface graphique Tkinter.
 ## Prérequis
 
 - Python 3.11 ou plus
-- `tkinter` installé sur le système
+- `tkinter` 
 - `pip`
-
-Sur Arch Linux :
-
-```bash
-sudo pacman -S python tk
-```
 
 ## Installation
 
