@@ -1,10 +1,12 @@
+from typing import Any
+
 from Awale import Awale
 from Gui_tkinter import GuiTkinter
 from Human import Human
-from MinMax import MinMaxBot
-from StupidBot import StupidBot
-from typing import Optional, Callable, Any
 from MCTS import MCTS
+from MinMax import MinMaxBot
+from Statistic import PlayerSpec, print_report, run_all_pairs
+from StupidBot import StupidBot
 
 
 class GameController:
@@ -23,6 +25,7 @@ class GameController:
         self.gui.on_start_game_callback = self._on_start_game
         self.gui.on_replay_callback = self._on_replay
         self.gui.on_back_to_menu_callback = self._on_back_to_menu
+        self.gui.on_statistics_callback = self._on_statistics
 
     def run_game(self):
         self.gui.show_menu()
@@ -45,6 +48,26 @@ class GameController:
     def _on_back_to_menu(self) -> None:
         self.game_over = False
         self.gui.show_menu()
+
+    def _on_statistics(self) -> None:
+        self.game_over = False
+        self.gui.show_menu()
+        self.gui.notify("Lancement des statistiques...")
+        self.gui.root.update_idletasks()
+        self.gui.root.update()
+
+        print("[stats] Demarrage du mode statistiques", flush=True)
+
+        minmax_score = PlayerSpec("IA (MinMax)", "MinMax score", {"depth": 4, "heuristic": "score"})
+        minmax_mobility = PlayerSpec("IA (MinMax)", "MinMax mobility", {"depth": 4, "heuristic": "mobility"})
+        stupid = PlayerSpec("IA (Stupide)", "Stupid Bot")
+        mcts = PlayerSpec("IA (MCTS)", "MCTS", {"iterations": 200, "time": 1.0, "temperature": 1.0})
+
+        specs = [minmax_score, minmax_mobility, stupid, mcts]
+        results = run_all_pairs(specs, games_per_start=100)
+        print_report(results)
+        print("[stats] Terminé", flush=True)
+        self.gui.notify("Statistiques terminees. Voir la console.")
 
     def _new_round(self) -> None:
         self.game = Awale()

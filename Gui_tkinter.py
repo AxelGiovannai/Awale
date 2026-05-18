@@ -27,6 +27,7 @@ class GuiTkinter:
         self.on_start_game_callback: Optional[Callable[[dict], None]] = None
         self.on_replay_callback: Optional[Callable[[], None]] = None
         self.on_back_to_menu_callback: Optional[Callable[[], None]] = None
+        self.on_statistics_callback: Optional[Callable[[], None]] = None
 
         self._build_menu_ui()
         self._build_game_ui()
@@ -187,6 +188,15 @@ class GuiTkinter:
         )
         start_button.pack(pady=(20, 8))
 
+        statistics_button = tk.Button(
+            self.menu_frame,
+            text="Statistiques",
+            command=self._handle_statistics_from_menu,
+            padx=12,
+            pady=8,
+        )
+        statistics_button.pack(pady=(0, 8))
+
         quit_button = tk.Button(
             self.menu_frame,
             text="Quitter",
@@ -333,6 +343,10 @@ class GuiTkinter:
     def _handle_replay(self) -> None:
         if self.on_replay_callback:
             self.on_replay_callback()
+
+    def _handle_statistics_from_menu(self) -> None:
+        if self.on_statistics_callback:
+            self.on_statistics_callback()
 
     def _handle_back_to_menu(self) -> None:
         if self.on_back_to_menu_callback:

@@ -71,21 +71,32 @@ class Awale:
         self.score[1] += sum(self.board[6:12])
         self.board = [0] * 12
 
-    def get_legal_moves(self) -> list[int]:
-        legal_moves = []
+    def _move_keeps_opponent_seed(self, pit: int) -> bool:
+        simulated_game = self.clone()
+        simulated_game._perform_move(pit)
+
+        opponent = 1 - self.current_player
+        return sum(simulated_game.board[i] for i in self._player_pits(opponent)) > 0
+
+    def _has_legal_move(self) -> bool:
         player = self.current_player
-        opponent = 1 - player
-        opponent_range = self._player_pits(opponent)
 
         for pit in self._player_pits(player):
             if self.board[pit] == 0:
                 continue
+            if self._move_keeps_opponent_seed(pit):
+                return True
 
-            simulated_game = self.clone()
-            simulated_game._perform_move(pit)
+        return False
 
-            opponent_seed_count = sum(simulated_game.board[i] for i in opponent_range)
-            if opponent_seed_count > 0:
+    def get_legal_moves(self) -> list[int]:
+        legal_moves = []
+
+        for pit in self._player_pits(self.current_player):
+            if self.board[pit] == 0:
+                continue
+
+            if self._move_keeps_opponent_seed(pit):
                 legal_moves.append(pit)
 
         return legal_moves
@@ -121,7 +132,7 @@ class Awale:
             return True
         if sum(self.board) == 0:
             return True
-        return len(self.get_legal_moves()) == 0
+        return not self._has_legal_move()
 
     def get_winner(self) -> Optional[int]:
         if not self.is_game_over():
