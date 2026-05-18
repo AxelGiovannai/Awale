@@ -46,51 +46,137 @@ class GuiTkinter:
         )
         subtitle.pack(pady=(0, 20))
 
+        # Variables pour Joueur 0
         self.player0_type_var = tk.StringVar(value="Humain")
-        self.player1_type_var = tk.StringVar(value="Humain")
-
         self.player0_depth_var = tk.IntVar(value=4)
-        self.player1_depth_var = tk.IntVar(value=4)
-
         self.player0_heuristic_var = tk.StringVar(value="score")
-        self.player1_heuristic_var = tk.StringVar(value="score")
+        self.player0_iterations_var = tk.IntVar(value=200)
+        self.player0_time_var = tk.DoubleVar(value=1.0)
+        self.player0_temperature_var = tk.DoubleVar(value=1.0)
 
+        # Variables pour Joueur 1
+        self.player1_type_var = tk.StringVar(value="Humain")
+        self.player1_depth_var = tk.IntVar(value=4)
+        self.player1_heuristic_var = tk.StringVar(value="score")
+        self.player1_iterations_var = tk.IntVar(value=200)
+        self.player1_time_var = tk.DoubleVar(value=1.0)
+        self.player1_temperature_var = tk.DoubleVar(value=1.0)
+
+        # Joueur 0 frame
         p0_frame = tk.LabelFrame(self.menu_frame, text="Joueur 0", padx=10, pady=10)
         p0_frame.pack(fill="x", pady=8)
 
         tk.Label(p0_frame, text="Type").grid(row=0, column=0, sticky="w")
         tk.OptionMenu(
-            p0_frame, self.player0_type_var, "Humain", "IA (Stupide)", "IA (MinMax)"
+            p0_frame, self.player0_type_var, "Humain", "IA (Stupide)", "IA (MinMax)", "IA (MCTS)"
         ).grid(row=0, column=1, sticky="ew")
 
-        tk.Label(p0_frame, text="Profondeur").grid(row=1, column=0, sticky="w")
-        tk.Spinbox(
-            p0_frame, from_=1, to=8, textvariable=self.player0_depth_var, width=5
-        ).grid(row=1, column=1, sticky="w")
+        # MinMax widgets pour Joueur 0
+        self.p0_minmax_widgets = []
 
-        tk.Label(p0_frame, text="Heuristique").grid(row=2, column=0, sticky="w")
-        tk.OptionMenu(
-            p0_frame, self.player0_heuristic_var, "score", "mobility"
-        ).grid(row=2, column=1, sticky="ew")
+        label = tk.Label(p0_frame, text="Profondeur")
+        label.grid(row=1, column=0, sticky="w")
+        self.p0_minmax_widgets.append(label)
 
+        spinbox = tk.Spinbox(p0_frame, from_=1, to=8, textvariable=self.player0_depth_var, width=5)
+        spinbox.grid(row=1, column=1, sticky="w")
+        self.p0_minmax_widgets.append(spinbox)
+
+        label = tk.Label(p0_frame, text="Heuristique")
+        label.grid(row=2, column=0, sticky="w")
+        self.p0_minmax_widgets.append(label)
+
+        optmenu = tk.OptionMenu(p0_frame, self.player0_heuristic_var, "score", "mobility")
+        optmenu.grid(row=2, column=1, sticky="ew")
+        self.p0_minmax_widgets.append(optmenu)
+
+        # MCTS widgets pour Joueur 0
+        self.p0_mcts_widgets = []
+
+        label = tk.Label(p0_frame, text="Iterations")
+        label.grid(row=3, column=0, sticky="w")
+        self.p0_mcts_widgets.append(label)
+
+        spinbox = tk.Spinbox(p0_frame, from_=10, to=5000, increment=10, textvariable=self.player0_iterations_var, width=8)
+        spinbox.grid(row=3, column=1, sticky="w")
+        self.p0_mcts_widgets.append(spinbox)
+
+        label = tk.Label(p0_frame, text="Temps max (s)")
+        label.grid(row=4, column=0, sticky="w")
+        self.p0_mcts_widgets.append(label)
+
+        spinbox = tk.Spinbox(p0_frame, from_=0.1, to=10.0, increment=0.1, textvariable=self.player0_time_var, width=8)
+        spinbox.grid(row=4, column=1, sticky="w")
+        self.p0_mcts_widgets.append(spinbox)
+
+        label = tk.Label(p0_frame, text="Temperature")
+        label.grid(row=5, column=0, sticky="w")
+        self.p0_mcts_widgets.append(label)
+
+        spinbox = tk.Spinbox(p0_frame, from_=0.1, to=5.0, increment=0.1, textvariable=self.player0_temperature_var, width=8)
+        spinbox.grid(row=5, column=1, sticky="w")
+        self.p0_mcts_widgets.append(spinbox)
+
+        # Joueur 1 frame
         p1_frame = tk.LabelFrame(self.menu_frame, text="Joueur 1", padx=10, pady=10)
         p1_frame.pack(fill="x", pady=8)
 
         tk.Label(p1_frame, text="Type").grid(row=0, column=0, sticky="w")
         tk.OptionMenu(
-            p1_frame, self.player1_type_var, "Humain", "IA (Stupide)", "IA (MinMax)"
+            p1_frame, self.player1_type_var, "Humain", "IA (Stupide)", "IA (MinMax)", "IA (MCTS)"
         ).grid(row=0, column=1, sticky="ew")
 
-        tk.Label(p1_frame, text="Profondeur").grid(row=1, column=0, sticky="w")
-        tk.Spinbox(
-            p1_frame, from_=1, to=8, textvariable=self.player1_depth_var, width=5
-        ).grid(row=1, column=1, sticky="w")
+        # MinMax widgets pour Joueur 1
+        self.p1_minmax_widgets = []
 
-        tk.Label(p1_frame, text="Heuristique").grid(row=2, column=0, sticky="w")
-        tk.OptionMenu(
-            p1_frame, self.player1_heuristic_var, "score", "mobility"
-        ).grid(row=2, column=1, sticky="ew")
+        label = tk.Label(p1_frame, text="Profondeur")
+        label.grid(row=1, column=0, sticky="w")
+        self.p1_minmax_widgets.append(label)
 
+        spinbox = tk.Spinbox(p1_frame, from_=1, to=8, textvariable=self.player1_depth_var, width=5)
+        spinbox.grid(row=1, column=1, sticky="w")
+        self.p1_minmax_widgets.append(spinbox)
+
+        label = tk.Label(p1_frame, text="Heuristique")
+        label.grid(row=2, column=0, sticky="w")
+        self.p1_minmax_widgets.append(label)
+
+        optmenu = tk.OptionMenu(p1_frame, self.player1_heuristic_var, "score", "mobility")
+        optmenu.grid(row=2, column=1, sticky="ew")
+        self.p1_minmax_widgets.append(optmenu)
+
+        # MCTS widgets pour Joueur 1
+        self.p1_mcts_widgets = []
+
+        label = tk.Label(p1_frame, text="Iterations")
+        label.grid(row=3, column=0, sticky="w")
+        self.p1_mcts_widgets.append(label)
+
+        spinbox = tk.Spinbox(p1_frame, from_=10, to=5000, increment=10, textvariable=self.player1_iterations_var, width=8)
+        spinbox.grid(row=3, column=1, sticky="w")
+        self.p1_mcts_widgets.append(spinbox)
+
+        label = tk.Label(p1_frame, text="Temps max (s)")
+        label.grid(row=4, column=0, sticky="w")
+        self.p1_mcts_widgets.append(label)
+
+        spinbox = tk.Spinbox(p1_frame, from_=0.1, to=10.0, increment=0.1, textvariable=self.player1_time_var, width=8)
+        spinbox.grid(row=4, column=1, sticky="w")
+        self.p1_mcts_widgets.append(spinbox)
+
+        label = tk.Label(p1_frame, text="Temperature")
+        label.grid(row=5, column=0, sticky="w")
+        self.p1_mcts_widgets.append(label)
+
+        spinbox = tk.Spinbox(p1_frame, from_=0.1, to=5.0, increment=0.1, textvariable=self.player1_temperature_var, width=8)
+        spinbox.grid(row=5, column=1, sticky="w")
+        self.p1_mcts_widgets.append(spinbox)
+
+        # Trace des changements de type
+        self.player0_type_var.trace("w", lambda *args: self._update_player_widgets(0))
+        self.player1_type_var.trace("w", lambda *args: self._update_player_widgets(1))
+
+        # Boutons
         start_button = tk.Button(
             self.menu_frame,
             text="Demarrer la partie",
@@ -109,6 +195,32 @@ class GuiTkinter:
             pady=6,
         )
         quit_button.pack()
+
+        # Affiche les widgets au démarrage
+        self._update_player_widgets(0)
+        self._update_player_widgets(1)
+
+    def _update_player_widgets(self, player_num: int) -> None:
+        if player_num == 0:
+            player_type = self.player0_type_var.get()
+            minmax_widgets = self.p0_minmax_widgets
+            mcts_widgets = self.p0_mcts_widgets
+        else:
+            player_type = self.player1_type_var.get()
+            minmax_widgets = self.p1_minmax_widgets
+            mcts_widgets = self.p1_mcts_widgets
+
+        # Cache tous les widgets
+        for widget in minmax_widgets + mcts_widgets:
+            widget.grid_remove()
+
+        # Affiche selon le type
+        if player_type == "IA (MinMax)":
+            for widget in minmax_widgets:
+                widget.grid()
+        elif player_type == "IA (MCTS)":
+            for widget in mcts_widgets:
+                widget.grid()
 
     def _build_game_ui(self) -> None:
         self.game_frame = tk.Frame(self.root)
@@ -200,11 +312,17 @@ class GuiTkinter:
                 "type": self.player0_type_var.get(),
                 "depth": self.player0_depth_var.get(),
                 "heuristic": self.player0_heuristic_var.get(),
+                "iterations": self.player0_iterations_var.get(),
+                "time": self.player0_time_var.get(),
+                "temperature": self.player0_temperature_var.get(),
             },
             "player1": {
                 "type": self.player1_type_var.get(),
                 "depth": self.player1_depth_var.get(),
                 "heuristic": self.player1_heuristic_var.get(),
+                "iterations": self.player1_iterations_var.get(),
+                "time": self.player1_time_var.get(),
+                "temperature": self.player1_temperature_var.get(),
             },
         }
         if self.on_start_game_callback:

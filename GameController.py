@@ -4,6 +4,7 @@ from Human import Human
 from MinMax import MinMaxBot
 from StupidBot import StupidBot
 from typing import Optional, Callable, Any
+from MCTS import MCTS
 
 
 class GameController:
@@ -143,6 +144,17 @@ class GameController:
                 self.gui,
                 max_depth=config.get("depth", 4),
                 heuristic=config.get("heuristic", "score"),
+            )
+
+        if player_type == "IA (MCTS)":
+            return MCTS(
+                name,
+                player_id,
+                self.game,
+                self.gui,
+                max_iterations=config.get("iterations", 200),
+                max_time=config.get("time", 1.0),
+                temperature=config.get("temperature", 1.0),
             )
 
         raise ValueError(f"Type de joueur inconnu: {player_type}")
